@@ -38,7 +38,8 @@ public class WalletResource {
 	
 	@POST
 	@Path("/{wallet}/addresses")
-	public Map<String,List<String>> createAddresses(@PathParam("wallet") String wallet){
+	public Map<String,List<String>> createAddresses(
+			@PathParam("wallet") String wallet){
 		Map<String,List<String>> rv = new HashMap<>();
 		rv.put("addresses", new ArrayList<String>());
 		rv.get("addresses").add(client.getnewaddress(wallet));

@@ -97,6 +97,12 @@
 		    <artifactId>jackson-jaxrs-json-provider</artifactId>
 		    <version>2.2.3</version>
 		</dependency>
+		
+		<dependency>
+		    <groupId>net.sf.ehcache</groupId>
+		    <artifactId>ehcache</artifactId>
+		    <version>2.7.4</version>
+		</dependency>
 	</dependencies>
 
 	<profiles>

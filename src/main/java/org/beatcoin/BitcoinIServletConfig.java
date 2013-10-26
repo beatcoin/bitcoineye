@@ -9,6 +9,12 @@ import java.util.Observer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
+import net.sf.ehcache.config.CacheConfiguration;
+import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
+
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -37,16 +43,18 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 	public static URL bcdUrl;
 	public static String bcdUser;
 	public static String bcdPassword;
+	public static String notUrl;
 	public static Logger log = LoggerFactory.getLogger(BitcoinIServletConfig.class);
 	public static Injector injector;
 	static {
 		try {
-			bcdUrl = new URL(System.getProperty("url"));
+			bcdUrl = new URL(System.getProperty("bcdUrl"));
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
-		bcdUser = System.getProperty("user");
-		bcdPassword = System.getProperty("password");
+		bcdUser = System.getProperty("bcdUser");
+		bcdPassword = System.getProperty("bcdPassword");
+		notUrl = System.getProperty("notUrl");
 	}
 	private WalletListener listener;
 	private ServletContext servletContext;
@@ -57,22 +65,31 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 		super.contextInitialized(servletContextEvent);
 		final Injector i = getInjector();
 		BitcoindInterface client = i.getInstance(BitcoindInterface.class);
-		
+		final Cache cache = i.getInstance(Cache.class);
 		try {
 			listener = new WalletListener(client);
 			listener.addObserver(new Observer() {
 				@Override
 				public void update(Observable o, Object arg) {
 					Transaction tx = ((Transaction)arg);
+					//check cache
+					if (null == cache.get(tx.getTxid())){
+						cache.put(new Element(tx.getTxid(), tx));
+					}else{
+						System.out.println("dropping transaction: "+tx.getTxid());
+						return;
+					}
+					
 					for (Transaction t : tx.getDetails()){
 						if (t.getCategory()==Category.RECEIVE){
 							Notification n = new Notification()
 								.setAddress(t.getAddress())
 								.setAmount(t.getAmount())
-								.setTime(tx.getBlocktime());
+								.setWallet(t.getAccount())
+								.setTime(tx.getTimereceived());
 							HttpClient client = new DefaultHttpClient();
 							try {
-								HttpPost httpPost = new HttpPost("http://localhost:8083/healthcheck");
+								HttpPost httpPost = new HttpPost(notUrl);
 								StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(n), HTTP.UTF_8);
 								entity.setContentType("application/json");
 								httpPost.setEntity(entity);
@@ -106,6 +123,20 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 				return bcf.getClient();
 			}
 
+        	@Provides @Singleton @SuppressWarnings("unused")
+        	public Cache provideCache(){
+        		//Create a singleton CacheManager using defaults
+        		CacheManager manager = CacheManager.create();
+        		//Create a Cache specifying its configuration.
+        		Cache testCache = new Cache(new CacheConfiguration("cache", 1000)
+        		    .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU)
+        		    .eternal(false)
+        		    .timeToLiveSeconds(7200)
+        		    .timeToIdleSeconds(3600)
+        		    .diskExpiryThreadIntervalSeconds(0));
+        		  manager.addCache(testCache);
+        		  return testCache;
+        	}
 			@Override
 			public void configureServlets() {
             	filter("/*").through(GuiceShiroFilter.class);

@@ -20,6 +20,7 @@ public class BitcoinIShiroWebModule extends ShiroWebModule {
 	protected void configureShiroWeb() {
 		try {
             bindRealm().toConstructor(IniRealm.class.getConstructor(Ini.class));
+            //addFilterChain("/wallets/**", AUTHC_BASIC, config(PERMS, "yes"));
         } catch (NoSuchMethodException e) {
             addError(e);
         }

@@ -8,6 +8,8 @@ public class Notification {
 	private String address;
 	private BigDecimal amount;
 	private Long time;
+	private String wallet;
+	
 	public String getAddress() {
 		return address;
 	}
@@ -27,6 +29,13 @@ public class Notification {
 	}
 	public Notification setTime(Long time) {
 		this.time = time;
+		return this;
+	}
+	public String getWallet() {
+		return wallet;
+	}
+	public Notification setWallet(String wallet) {
+		this.wallet = wallet;
 		return this;
 	}
 	
