@@ -1,13 +1,21 @@
 package org.beatcoin;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.shiro.guice.web.GuiceShiroFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,14 +32,12 @@ import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 
 public class BitcoinIServletConfig extends GuiceServletContextListener {
-	public static String domainName;
 	public static URL bcdUrl;
 	public static String bcdUser;
 	public static String bcdPassword;
 	public static Logger log = LoggerFactory.getLogger(BitcoinIServletConfig.class);
 	public static Injector injector;
 	static {
-		domainName = System.getProperty("swfDomain");
 		try {
 			bcdUrl = new URL(System.getProperty("url"));
 		} catch (MalformedURLException e) {
@@ -41,9 +47,11 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 		bcdPassword = System.getProperty("password");
 	}
 	private WalletListener listener;
+	private ServletContext servletContext;
 
 	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
+		servletContext = servletContextEvent.getServletContext();
 		super.contextInitialized(servletContextEvent);
 		final Injector i = getInjector();
 		BitcoindInterface client = i.getInstance(BitcoindInterface.class);
@@ -54,7 +62,35 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 				@Override
 				public void update(Observable o, Object arg) {
 					Transaction t = (Transaction)arg;
+					
 					t.getAccount();
+					
+					try {
+							HttpClient httpClient = new DefaultHttpClient();
+							HttpGet getRequest = new HttpGet(
+								"http://localhost:8080/RESTfulExample/json/product/get");
+							getRequest.addHeader("accept", "application/json");
+					 
+							HttpResponse response = httpClient.execute(getRequest);
+					 
+							if (response.getStatusLine().getStatusCode() != 200) {
+								Exception e = new RuntimeException("Failed : HTTP error code : "
+								   + response.getStatusLine().getStatusCode());
+								e.printStackTrace();
+							}
+					 
+							BufferedReader br = new BufferedReader(
+					                         new InputStreamReader((response.getEntity().getContent())));
+					 
+							String output;
+							System.out.println("Output from Server .... \n");
+							while ((output = br.readLine()) != null) {
+								System.out.println(output);
+							}
+					 
+						  } catch (IOException e) {
+							e.printStackTrace();
+						  }
 				}
 			});
 			
@@ -84,7 +120,7 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
             	filter("/*").through(GuiceShiroFilter.class);
 			}
 
-		});
+		},new BitcoinIShiroWebModule(this.servletContext));
 		return injector;
 	}
 

@@ -18,7 +18,7 @@ public class BitcoinIApplication extends ResourceConfig {
     @Inject
     public BitcoinIApplication(ServiceLocator serviceLocator) {
         // Set package to look for resources in
-        packages("com._37coins.resources","org.glassfish.jersey.examples.jackson");
+        packages("org.beatcoin.resources");
 
         System.out.println("Registering injectables...");
 
