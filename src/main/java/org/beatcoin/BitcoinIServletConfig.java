@@ -1,8 +1,6 @@
 package org.beatcoin;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Observable;
@@ -11,12 +9,13 @@ import java.util.Observer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.HTTP;
 import org.apache.shiro.guice.web.GuiceShiroFilter;
+import org.beatcoin.pojo.Notification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +23,8 @@ import com._37coins.bcJsonRpc.BitcoindClientFactory;
 import com._37coins.bcJsonRpc.BitcoindInterface;
 import com._37coins.bcJsonRpc.events.WalletListener;
 import com._37coins.bcJsonRpc.pojo.Transaction;
+import com._37coins.bcJsonRpc.pojo.Transaction.Category;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
@@ -31,6 +32,7 @@ import com.google.inject.Singleton;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 
+@SuppressWarnings("deprecation")
 public class BitcoinIServletConfig extends GuiceServletContextListener {
 	public static URL bcdUrl;
 	public static String bcdUser;
@@ -61,36 +63,25 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 			listener.addObserver(new Observer() {
 				@Override
 				public void update(Observable o, Object arg) {
-					Transaction t = (Transaction)arg;
-					
-					t.getAccount();
-					
-					try {
-							HttpClient httpClient = new DefaultHttpClient();
-							HttpGet getRequest = new HttpGet(
-								"http://localhost:8080/RESTfulExample/json/product/get");
-							getRequest.addHeader("accept", "application/json");
-					 
-							HttpResponse response = httpClient.execute(getRequest);
-					 
-							if (response.getStatusLine().getStatusCode() != 200) {
-								Exception e = new RuntimeException("Failed : HTTP error code : "
-								   + response.getStatusLine().getStatusCode());
+					Transaction tx = ((Transaction)arg);
+					for (Transaction t : tx.getDetails()){
+						if (t.getCategory()==Category.RECEIVE){
+							Notification n = new Notification()
+								.setAddress(t.getAddress())
+								.setAmount(t.getAmount())
+								.setTime(tx.getBlocktime());
+							HttpClient client = new DefaultHttpClient();
+							try {
+								HttpPost httpPost = new HttpPost("http://localhost:8083/healthcheck");
+								StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(n), HTTP.UTF_8);
+								entity.setContentType("application/json");
+								httpPost.setEntity(entity);
+								client.execute(httpPost);
+							} catch (IOException e) {
 								e.printStackTrace();
-							}
-					 
-							BufferedReader br = new BufferedReader(
-					                         new InputStreamReader((response.getEntity().getContent())));
-					 
-							String output;
-							System.out.println("Output from Server .... \n");
-							while ((output = br.readLine()) != null) {
-								System.out.println(output);
-							}
-					 
-						  } catch (IOException e) {
-							e.printStackTrace();
-						  }
+							}							
+						}
+					}
 				}
 			});
 			
