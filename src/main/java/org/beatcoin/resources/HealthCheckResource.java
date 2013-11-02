@@ -9,7 +9,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.beatcoin.pojo.Notification;
+import org.beatcoin.pojo.Payment;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,7 +28,7 @@ public class HealthCheckResource {
 	}
 	
 	@POST
-	public void getNot(Notification not){
+	public void getNot(Payment not){
 		try {
 			System.out.println(new ObjectMapper().writeValueAsString(not));
 		} catch (JsonProcessingException e) {

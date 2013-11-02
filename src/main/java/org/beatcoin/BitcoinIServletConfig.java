@@ -15,13 +15,14 @@ import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
+import org.apache.http.Consts;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.HTTP;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.shiro.guice.web.GuiceShiroFilter;
 import org.beatcoin.pojo.Notification;
+import org.beatcoin.pojo.Payment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,6 @@ import com.google.inject.Singleton;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 
-@SuppressWarnings("deprecation")
 public class BitcoinIServletConfig extends GuiceServletContextListener {
 	public static URL bcdUrl;
 	public static String bcdUser;
@@ -84,15 +84,16 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 					
 					for (Transaction t : tx.getDetails()){
 						if (t.getCategory()==Category.RECEIVE){
-							Notification n = new Notification()
-								.setAddress(t.getAddress())
-								.setAmount(t.getAmount())
-								.setWallet(t.getAccount())
-								.setTime(tx.getTimereceived());
-							HttpClient client = new DefaultHttpClient();
+							Notification n = new Notification().setSubject("payment")
+								.setPayment(new Payment()
+									.setAddress(t.getAddress())
+									.setAmount(t.getAmount())
+									.setWallet(t.getAccount())
+									.setTime(tx.getTimereceived()));
+							HttpClient client = HttpClientBuilder.create().build();
 							try {
 								HttpPost httpPost = new HttpPost(notUrl);
-								StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(n), HTTP.UTF_8);
+								StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(n), Consts.UTF_8);
 								entity.setContentType("application/json");
 								httpPost.setEntity(entity);
 								client.execute(httpPost);

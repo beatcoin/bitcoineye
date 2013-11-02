@@ -1,5 +1,6 @@
 package org.beatcoin.pool;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -8,10 +9,17 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.http.Consts;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.beatcoin.BitcoinIServletConfig;
 import org.beatcoin.pojo.Address;
+import org.beatcoin.pojo.Notification;
 
 import com._37coins.bcJsonRpc.BitcoindInterface;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class PoolInitializer extends Thread {
 	
@@ -55,6 +63,18 @@ public class PoolInitializer extends Thread {
 				}
 			}
 			addressPool.setInitialized();
+			Notification n = new Notification().setSubject("status")
+					.setStatus("pool initialized");
+			HttpClient client = HttpClientBuilder.create().build();
+			try {
+				HttpPost httpPost = new HttpPost(BitcoinIServletConfig.notUrl);
+				StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(n), Consts.UTF_8);
+				entity.setContentType("application/json");
+				httpPost.setEntity(entity);
+				client.execute(httpPost);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}	
 		}else{ // add a new account
 			Set<Address> pool = addressPool.addPool(account);
 			for (int i = 0;i<BitcoinIServletConfig.poolSize;i++){

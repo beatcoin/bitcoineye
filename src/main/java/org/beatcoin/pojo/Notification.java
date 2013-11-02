@@ -1,41 +1,35 @@
 package org.beatcoin.pojo;
 
-import java.math.BigDecimal;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+@JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class Notification {
 	
-	
-	private String address;
-	private BigDecimal amount;
-	private Long time;
-	private String wallet;
-	
-	public String getAddress() {
-		return address;
+	private String subject;
+	private Payment payment;
+	private String status;
+	public String getSubject() {
+		return subject;
 	}
-	public Notification setAddress(String address) {
-		this.address = address;
+	public Notification setSubject(String subject) {
+		this.subject = subject;
 		return this;
 	}
-	public BigDecimal getAmount() {
-		return amount;
+	public Payment getPayment() {
+		return payment;
 	}
-	public Notification setAmount(BigDecimal amount) {
-		this.amount = amount;
+	public Notification setPayment(Payment payment) {
+		this.payment = payment;
 		return this;
 	}
-	public Long getTime() {
-		return time;
+	public String getStatus() {
+		return status;
 	}
-	public Notification setTime(Long time) {
-		this.time = time;
-		return this;
-	}
-	public String getWallet() {
-		return wallet;
-	}
-	public Notification setWallet(String wallet) {
-		this.wallet = wallet;
+	public Notification setStatus(String status) {
+		this.status = status;
 		return this;
 	}
 	

@@ -49,5 +49,10 @@ public class PoolTester {
 		Assert.assertNotNull(fifth);
 		Assert.assertEquals(third, fifth);
 	}
+	
+	@Test
+	public void testAdd() throws NotInitializedException {
+		
+	}
 
 }

@@ -23,7 +23,7 @@ import com.google.inject.Injector;
 @Path(WalletResource.PATH)
 @Produces(MediaType.APPLICATION_JSON)
 public class WalletResource {
-	public final static String PATH = "/wallets";
+	public final static String PATH = "/accounts";
 	
 	private final AddressPool addressPool;
 	private final Injector injector;
