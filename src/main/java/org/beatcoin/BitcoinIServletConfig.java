@@ -46,6 +46,7 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 	public static String notUrl;
 	public static Logger log = LoggerFactory.getLogger(BitcoinIServletConfig.class);
 	public static Injector injector;
+	public static int poolSize;
 	static {
 		try {
 			bcdUrl = new URL(System.getProperty("bcdUrl"));
@@ -55,6 +56,7 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 		bcdUser = System.getProperty("bcdUser");
 		bcdPassword = System.getProperty("bcdPassword");
 		notUrl = System.getProperty("notUrl");
+		poolSize = (null!=System.getProperty("poolSize"))?Integer.parseInt(System.getProperty("poolSize")):20;
 	}
 	private WalletListener listener;
 	private ServletContext servletContext;
