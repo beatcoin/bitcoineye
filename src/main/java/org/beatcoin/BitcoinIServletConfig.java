@@ -148,6 +148,7 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
         		  manager.addCache(testCache);
         		  return testCache;
         	}
+        	
 			@Override
 			public void configureServlets() {
             	filter("/*").through(GuiceShiroFilter.class);

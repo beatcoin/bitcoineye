@@ -75,7 +75,7 @@ public class WalletResource {
 		try {
 			boolean released = addressPool.releaseAddress(account, address);
 			if (!released){
-				throw new WebApplicationException("pool exhausted", Response.Status.NOT_FOUND);
+				throw new WebApplicationException("address not in pool", Response.Status.NOT_FOUND);
 			}
 		} catch (NotInitializedException e) {
 			throw new WebApplicationException(e, Response.Status.PRECONDITION_FAILED);

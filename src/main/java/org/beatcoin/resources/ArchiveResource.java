@@ -2,7 +2,10 @@ package org.beatcoin.resources;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -13,8 +16,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -40,7 +46,7 @@ import org.beatcoin.pojo.Song;
 @Path(ArchiveResource.PATH)
 @Produces(MediaType.APPLICATION_JSON)
 public class ArchiveResource {
-	public final static String PATH = "/archive";
+	public final static String PATH = "/archives";
 	
 	private final Directory directory;
 	private final Analyzer analyzer;
@@ -54,10 +60,18 @@ public class ArchiveResource {
 	@POST
 	@Path("/{account}/songs")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void addSongs(List<Song> songs,
+	public Map<String,String> addSongs(List<Song> songs,
 			@PathParam("account") String account){
 		if (null==songs || songs.size()<1){
-			return;
+			throw new WebApplicationException("no songs in body", Response.Status.BAD_REQUEST);
+		}
+		Map<String,String> rv = null;
+		if (account.equals("0")){
+			account = UUID.randomUUID().toString();
+			String token = RandomStringUtils.random(5, "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ123456789");
+			rv = new HashMap<>();
+			rv.put("id", account);
+			rv.put("token", token);
 		}
 		try{
 			IndexWriter iwriter = new IndexWriter(directory, new IndexWriterConfig(Version.LUCENE_45, analyzer));
@@ -71,8 +85,9 @@ public class ArchiveResource {
 			    iwriter.addDocument(doc);
 			}
 			iwriter.close();
+			return rv;
 		}catch (IOException e){
-			e.printStackTrace();
+			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
