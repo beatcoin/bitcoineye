@@ -1,6 +1,7 @@
 package org.beatcoin.resources;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -134,7 +135,7 @@ public class QueueResource {
 				throw new WebApplicationException("pool exhausted", Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE);
 			}
 		    //add to queue
-			rv.setAddress(address);
+			rv.setAddress(address).setSum(new BigDecimal("0.0").setScale(8));
 			Element e = cache.get(account);
 			PriorityBlockingQueue<Song> pq = (null!=e)?(PriorityBlockingQueue<Song>)e.getObjectValue():new PriorityBlockingQueue<Song>();
 			pq.add(rv);

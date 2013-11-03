@@ -17,12 +17,14 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.beatcoin.BitcoinIServletConfig;
 import org.beatcoin.pojo.Address;
 import org.beatcoin.pojo.Notification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com._37coins.bcJsonRpc.BitcoindInterface;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class PoolInitializer extends Thread {
-	
+	public static Logger log = LoggerFactory.getLogger(PoolInitializer.class);
 	private final BitcoindInterface client;
 	private AddressPool addressPool;
 	private String account;
@@ -75,7 +77,7 @@ public class PoolInitializer extends Thread {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			System.out.println("pool initialized");
+			log.info("pool initialized");
 		}else{ // add a new account
 			Set<Address> pool = addressPool.addPool(account);
 			for (int i = 0;i<BitcoinIServletConfig.poolSize;i++){

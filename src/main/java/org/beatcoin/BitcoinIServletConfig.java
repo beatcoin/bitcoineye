@@ -182,6 +182,7 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 			@Override
 			public void configureServlets() {
             	filter("/*").through(GuiceShiroFilter.class);
+            	filter("/*").through(LoggingFilter.class);
 			}
 
 		},new BitcoinIShiroWebModule(this.servletContext));

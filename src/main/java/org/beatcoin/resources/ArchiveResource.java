@@ -84,6 +84,10 @@ public class ArchiveResource {
 			poolInitializer.setPool(addressPool);
 			poolInitializer.setAccount(account);
 			poolInitializer.start();
+		}else{
+			rv = new HashMap<>();
+			rv.put("id", account);
+			rv.put("token", "forgot");
 		}
 		try{
 			IndexWriter iwriter = new IndexWriter(directory, new IndexWriterConfig(Version.LUCENE_45, analyzer));
@@ -99,6 +103,7 @@ public class ArchiveResource {
 			iwriter.close();
 			return rv;
 		}catch (IOException e){
+			e.printStackTrace();
 			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
