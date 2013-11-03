@@ -20,6 +20,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.RAMDirectory;
 import org.apache.shiro.guice.web.GuiceShiroFilter;
 import org.beatcoin.pojo.Notification;
 import org.beatcoin.pojo.Payment;
@@ -124,6 +126,12 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 					e.printStackTrace();
 				}
 				return bcf.getClient();
+			}
+			
+			@Provides @Singleton @SuppressWarnings("unused")
+			public Directory provideDirectory(){
+				Directory directory = new RAMDirectory();
+				return directory;
 			}
 
         	@Provides @Singleton @SuppressWarnings("unused")
