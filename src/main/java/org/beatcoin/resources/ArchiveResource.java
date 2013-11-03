@@ -42,6 +42,10 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.Version;
 import org.beatcoin.pojo.Song;
+import org.beatcoin.pool.AddressPool;
+import org.beatcoin.pool.PoolInitializer;
+
+import com.google.inject.Injector;
 
 @Path(ArchiveResource.PATH)
 @Produces(MediaType.APPLICATION_JSON)
@@ -50,11 +54,15 @@ public class ArchiveResource {
 	
 	private final Directory directory;
 	private final Analyzer analyzer;
+	private final Injector injector;
+	private final AddressPool addressPool;
 	
 	@Inject
-	public ArchiveResource(Directory directory){
+	public ArchiveResource(Directory directory, Injector injector, AddressPool addressPool){
 		this.directory = directory;
 		this.analyzer = new StandardAnalyzer(Version.LUCENE_45);
+		this.injector = injector;
+		this.addressPool = addressPool;
 	}
 		
 	@POST
@@ -72,6 +80,10 @@ public class ArchiveResource {
 			rv = new HashMap<>();
 			rv.put("id", account);
 			rv.put("token", token);
+			PoolInitializer poolInitializer = injector.getInstance(PoolInitializer.class);
+			poolInitializer.setPool(addressPool);
+			poolInitializer.setAccount(account);
+			poolInitializer.start();
 		}
 		try{
 			IndexWriter iwriter = new IndexWriter(directory, new IndexWriterConfig(Version.LUCENE_45, analyzer));

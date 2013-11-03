@@ -1,6 +1,8 @@
 package org.beatcoin.resources;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import javax.inject.Inject;
@@ -76,10 +78,15 @@ public class QueueResource {
 		if (null!=e){
 			PriorityBlockingQueue<Song> pq = (PriorityBlockingQueue<Song>)e.getObjectValue();
 			Song next = pq.poll();
+			String address = next.getAddress();
 			//add to history
+			Element e1 = cache.get("history-"+account);
+			List<Song> hl = (null!=e)?(List<Song>)e1.getObjectValue():new ArrayList<Song>();
+			hl.add(next.setAddress(null).setPlayStarted(System.currentTimeMillis()));
+			cache.put(new Element("history-"+account, hl));
 			//release address
 			try {
-				boolean released = addressPool.releaseAddress(account, next.getAddress());
+				boolean released = addressPool.releaseAddress(account, address);
 				if (!released){
 					throw new WebApplicationException("address not in pool", Response.Status.NOT_FOUND);
 				}
@@ -112,6 +119,9 @@ public class QueueResource {
 		    		  .setArtist(hitDoc.get("artist"))
 		    		  .setTitle(hitDoc.get("title"));
 		    ireader.close();
+		    //******
+		    //TODO: check if not in queue already
+		    //****
 		    //get a bitcoin address
 		    String address = null;
 			try {

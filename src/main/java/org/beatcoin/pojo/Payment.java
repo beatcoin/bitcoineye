@@ -39,7 +39,7 @@ public class Payment {
 	public String getWallet() {
 		return wallet;
 	}
-	public Payment setWallet(String wallet) {
+	public Payment setAccount(String wallet) {
 		this.wallet = wallet;
 		return this;
 	}

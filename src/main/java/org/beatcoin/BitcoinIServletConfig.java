@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.PriorityBlockingQueue;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -25,6 +26,7 @@ import org.apache.lucene.store.RAMDirectory;
 import org.apache.shiro.guice.web.GuiceShiroFilter;
 import org.beatcoin.pojo.Notification;
 import org.beatcoin.pojo.Payment;
+import org.beatcoin.pojo.Song;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,18 +92,33 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 								.setPayment(new Payment()
 									.setAddress(t.getAddress())
 									.setAmount(t.getAmount())
-									.setWallet(t.getAccount())
+									.setAccount(t.getAccount())
 									.setTime(tx.getTimereceived()));
-							HttpClient client = HttpClientBuilder.create().build();
-							try {
-								HttpPost httpPost = new HttpPost(notUrl);
-								StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(n), Consts.UTF_8);
-								entity.setContentType("application/json");
-								httpPost.setEntity(entity);
-								client.execute(httpPost);
-							} catch (IOException e) {
-								e.printStackTrace();
-							}							
+							//handle transaction
+							Element e = cache.get(t.getAccount());
+							if (null!=e){
+								@SuppressWarnings("unchecked")
+								PriorityBlockingQueue<Song> pq = (PriorityBlockingQueue<Song>)e.getObjectValue();
+								for (Song song: pq){
+									if (song.getAddress().equals(t.getAddress())){
+										song.setSum(t.getAmount().add(song.getSum()).setScale(8));
+										cache.put(new Element(t.getAccount(),pq));
+									}
+								}
+							}
+							//notify if configured
+							if (null!=notUrl){
+								HttpClient client = HttpClientBuilder.create().build();
+								try {
+									HttpPost httpPost = new HttpPost(notUrl);
+									StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(n), Consts.UTF_8);
+									entity.setContentType("application/json");
+									httpPost.setEntity(entity);
+									client.execute(httpPost);
+								} catch (IOException ex) {
+									ex.printStackTrace();
+								}					
+							}
 						}
 					}
 				}
