@@ -81,7 +81,7 @@ public class QueueResource {
 			String address = next.getAddress();
 			//add to history
 			Element e1 = cache.get("history-"+account);
-			List<Song> hl = (null!=e)?(List<Song>)e1.getObjectValue():new ArrayList<Song>();
+			List<Song> hl = (null!=e1)?(List<Song>)e1.getObjectValue():new ArrayList<Song>();
 			hl.add(next.setAddress(null).setPlayStarted(System.currentTimeMillis()));
 			cache.put(new Element("history-"+account, hl));
 			//release address
@@ -111,7 +111,7 @@ public class QueueResource {
 		    Query query = null;
 		    QueryParser parser = new QueryParser(Version.LUCENE_45,"id", analyzer);
 			query = parser.parse(song.getId());
-		    Filter jakeFilter = new QueryWrapperFilter(new TermQuery(new Term("account", account))); 
+		    Filter jakeFilter = new QueryWrapperFilter(new TermQuery(new Term("account", account.replace("-", "")))); 
 		    ScoreDoc[] hits = isearcher.search(query, jakeFilter, 1).scoreDocs;
 		    Document hitDoc = isearcher.doc(hits[0].doc);
 		    rv = new Song().setId(hitDoc.get("id"))

@@ -74,7 +74,8 @@ public class PoolInitializer extends Thread {
 				client.execute(httpPost);
 			} catch (IOException e) {
 				e.printStackTrace();
-			}	
+			}
+			System.out.println("pool initialized");
 		}else{ // add a new account
 			Set<Address> pool = addressPool.addPool(account);
 			for (int i = 0;i<BitcoinIServletConfig.poolSize;i++){

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -23,6 +24,7 @@ public class HistoryResource {
 	
 	private final Cache cache;
 
+	@Inject
 	public HistoryResource(Cache cache){
 		this.cache = cache;
 	}

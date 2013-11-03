@@ -27,6 +27,8 @@ import org.apache.shiro.guice.web.GuiceShiroFilter;
 import org.beatcoin.pojo.Notification;
 import org.beatcoin.pojo.Payment;
 import org.beatcoin.pojo.Song;
+import org.beatcoin.pool.AddressPool;
+import org.beatcoin.pool.PoolInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,6 +130,7 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		i.getInstance(AddressPool.class);
 	}
 
 	@Override
@@ -143,6 +146,16 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 					e.printStackTrace();
 				}
 				return bcf.getClient();
+			}
+			
+			@Provides @SuppressWarnings("unused")
+			public PoolInitializer provideInit(BitcoindInterface client){
+				return new PoolInitializer(client);
+			}
+			
+			@Provides @Singleton @SuppressWarnings("unused")
+			public AddressPool provideAD(PoolInitializer pi){
+				return new AddressPool(pi);
 			}
 			
 			@Provides @Singleton @SuppressWarnings("unused")

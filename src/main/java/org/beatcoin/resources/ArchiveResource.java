@@ -93,7 +93,7 @@ public class ArchiveResource {
 			    doc.add(new Field("title", song.getTitle(), TextField.TYPE_STORED));
 			    if (null!= song.getArtist())doc.add(new Field("artist", song.getArtist(), TextField.TYPE_STORED));
 			    if (null!= song.getAlbum())doc.add(new Field("album", song.getAlbum(), TextField.TYPE_STORED));
-			    doc.add(new Field("account", account, TextField.TYPE_STORED)); 
+			    doc.add(new Field("account", account.replace("-", ""), TextField.TYPE_STORED)); 
 			    iwriter.addDocument(doc);
 			}
 			iwriter.close();
@@ -122,9 +122,9 @@ public class ArchiveResource {
 			    query = parser.parse(queryString);
 		    }else{
 			    QueryParser parser = new QueryParser(Version.LUCENE_45,"account", analyzer);
-			    query = parser.parse(account);
+			    query = parser.parse(account.replace("-", ""));
 		    }
-		    Filter jakeFilter = new QueryWrapperFilter(new TermQuery(new Term("account", account))); 
+		    Filter jakeFilter = new QueryWrapperFilter(new TermQuery(new Term("account", account.replace("-", "")))); 
 		    ScoreDoc[] hits = isearcher.search(query, jakeFilter, 10).scoreDocs;
 		    // Iterate through the results:
 		    for (int i = 0; i < hits.length; i++) {
@@ -148,7 +148,7 @@ public class ArchiveResource {
 		try{
 			IndexWriter iwriter = new IndexWriter(directory, new IndexWriterConfig(Version.LUCENE_45, analyzer));
 			QueryParser parser = new QueryParser(Version.LUCENE_45,"account", analyzer);
-			Query query = parser.parse(account);
+			Query query = parser.parse(account.replace("-", ""));
 			iwriter.deleteDocuments(query);
 			iwriter.close();
 		}catch (IOException|ParseException e){
