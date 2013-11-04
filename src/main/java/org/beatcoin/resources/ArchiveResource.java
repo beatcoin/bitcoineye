@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -41,6 +42,7 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.Version;
+import org.beatcoin.pojo.Address;
 import org.beatcoin.pojo.Song;
 import org.beatcoin.pool.AddressPool;
 import org.beatcoin.pool.PoolInitializer;
@@ -63,6 +65,13 @@ public class ArchiveResource {
 		this.analyzer = new StandardAnalyzer(Version.LUCENE_45);
 		this.injector = injector;
 		this.addressPool = addressPool;
+	}
+	
+	
+	@GET
+	public Set<String> getPools(){
+		Map<String,Set<Address>> pools = addressPool.getPools();
+		return pools.keySet();
 	}
 		
 	@POST

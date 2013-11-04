@@ -89,7 +89,7 @@ public class AddressPool {
 		return pools.get(label);
 	}
 	
-	protected Map<String,Set<Address>> getPools(){
+	public Map<String,Set<Address>> getPools(){
 		return pools;
 	}
 	
