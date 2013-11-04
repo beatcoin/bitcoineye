@@ -16,7 +16,8 @@ public class Song implements Comparable<Song>{
 	private String artist;
 	private String album;
 	private Long length;
-	private Long playStarted;
+	private Long playedAt;
+	private Long queuedAt;
 	private BigDecimal sum;
 	
 	public String getId() {
@@ -70,13 +71,22 @@ public class Song implements Comparable<Song>{
 		return this;
 	}
 	
-	public Long getPlayStarted() {
-		return playStarted;
+	public Long getPlayedAt() {
+		return playedAt;
 	}
-	public Song setPlayStarted(Long playStarted) {
-		this.playStarted = playStarted;
+	public Song setPlayedAt(Long playedAt) {
+		this.playedAt = playedAt;
 		return this;
 	}
+	
+	public Long getQueuedAt() {
+		return queuedAt;
+	}
+	public Song setQueuedAt(Long queuedAt) {
+		this.queuedAt = queuedAt;
+		return this;
+	}
+	
 	@Override
 	public int compareTo(Song o) {
 		return this.getSum().compareTo(o.getSum());

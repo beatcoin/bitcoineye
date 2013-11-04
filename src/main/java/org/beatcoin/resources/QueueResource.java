@@ -79,11 +79,13 @@ public class QueueResource {
 		if (null!=e){
 			PriorityBlockingQueue<Song> pq = (PriorityBlockingQueue<Song>)e.getObjectValue();
 			Song next = pq.poll();
+			if (null==next || next.getSum().compareTo(BigDecimal.ZERO)<=0)
+				return null;
 			String address = next.getAddress();
 			//add to history
 			Element e1 = cache.get("history-"+account);
 			List<Song> hl = (null!=e1)?(List<Song>)e1.getObjectValue():new ArrayList<Song>();
-			hl.add(next.setAddress(null).setPlayStarted(System.currentTimeMillis()));
+			hl.add(next.setAddress(null).setPlayedAt(System.currentTimeMillis()));
 			cache.put(new Element("history-"+account, hl));
 			//release address
 			try {
@@ -135,7 +137,7 @@ public class QueueResource {
 				throw new WebApplicationException("pool exhausted", Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE);
 			}
 		    //add to queue
-			rv.setAddress(address).setSum(new BigDecimal("0.0").setScale(8));
+			rv.setAddress(address).setSum(new BigDecimal("0.0").setScale(8)).setQueuedAt(System.currentTimeMillis());
 			Element e = cache.get(account);
 			PriorityBlockingQueue<Song> pq = (null!=e)?(PriorityBlockingQueue<Song>)e.getObjectValue():new PriorityBlockingQueue<Song>();
 			pq.add(rv);
