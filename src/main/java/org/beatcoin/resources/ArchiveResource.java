@@ -28,6 +28,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
@@ -151,6 +152,9 @@ public class ArchiveResource {
 		    }
 		    ireader.close();
 		}catch (IOException|ParseException e){
+			if (e instanceof IndexNotFoundException){
+				throw new WebApplicationException(e, Response.Status.NOT_FOUND);
+			}
 			e.printStackTrace();
 		}
 		return rv;

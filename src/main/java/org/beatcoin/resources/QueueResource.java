@@ -78,9 +78,12 @@ public class QueueResource {
 		Element e = cache.get(account);
 		if (null!=e){
 			PriorityBlockingQueue<Song> pq = (PriorityBlockingQueue<Song>)e.getObjectValue();
-			Song next = pq.poll();
-			if (null==next || next.getSum().compareTo(BigDecimal.ZERO)<=0)
+			Song next = pq.peek();
+			if (null==next || next.getSum().compareTo(BigDecimal.ZERO)<=0){
 				return null;
+			}else{
+				next = pq.poll();
+			}
 			String address = next.getAddress();
 			//add to history
 			Element e1 = cache.get("history-"+account);

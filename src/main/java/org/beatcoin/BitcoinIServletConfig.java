@@ -50,6 +50,8 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 	public static String bcdUser;
 	public static String bcdPassword;
 	public static String notUrl;
+	public static String basePath;
+	public static String resPath;
 	public static Logger log = LoggerFactory.getLogger(BitcoinIServletConfig.class);
 	public static Injector injector;
 	public static int poolSize;
@@ -62,6 +64,8 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 		bcdUser = System.getProperty("bcdUser");
 		bcdPassword = System.getProperty("bcdPassword");
 		notUrl = System.getProperty("notUrl");
+		basePath = System.getProperty("basePath");
+		resPath = System.getProperty("resPath");
 		poolSize = (null!=System.getProperty("poolSize"))?Integer.parseInt(System.getProperty("poolSize")):20;
 	}
 	private WalletListener listener;

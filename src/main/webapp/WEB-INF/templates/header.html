@@ -1,0 +1,22 @@
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>Beatcoin</title>
+<meta name="description" content="a bitcoin jukebox.">
+<meta name="author" content="beatcoin">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+<link rel="stylesheet" href="${resPath}/styles/bootstrap-theme.css">
+<link href="//netdna.bootstrapcdn.com/font-awesome/4.0.0/css/font-awesome.css" rel="stylesheet">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:700" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="${resPath}/styles/main.css">
+
+<script src="${resPath}/scripts/vendor/modernizr.js"></script>
+<script type="text/javascript">
+		window.opt = {
+			resPath: '${resPath}',
+			lng: '${lng}',
+			defaultAccount: <#if defaultAccount??>'${defaultAccount}'<#else>null</#if>,
+			basePath: <#if basePath??>'${basePath}'<#else>null</#if>
+	};
+</script>
