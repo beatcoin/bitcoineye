@@ -1,5 +1,6 @@
 package org.beatcoin.dao;
 
+import java.io.IOException;
 import java.util.Set;
 
 import javax.jdo.annotations.Discriminator;
@@ -7,8 +8,15 @@ import javax.jdo.annotations.DiscriminatorStrategy;
 import javax.jdo.annotations.Index;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
+import javax.jdo.annotations.Serialized;
 
+import org.beatcoin.pojo.Playlist;
 import org.restnucleus.dao.Model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @PersistenceCapable
 @Discriminator(strategy = DiscriminatorStrategy.CLASS_NAME)
@@ -25,7 +33,8 @@ public class Device extends Model{
 	@Persistent
 	private Account owner;
 	@Persistent
-	private Set<Playlist> playlists;
+	@Serialized
+	private String playlists;
 	
 	public String getUuid() {
 		return uuid;
@@ -56,11 +65,31 @@ public class Device extends Model{
 		return this;
 	}
 	
-	public Set<Playlist> getPlaylists() {
+	public String getPlaylists() {
 		return playlists;
 	}
-	public Device setPlaylists(Set<Playlist> playlists) {
+	public Device setPlaylists(String playlists) {
 		this.playlists = playlists;
+		return this;
+	}
+	@JsonIgnore
+	public Set<Playlist> getPlaylistSet() {
+		if (null==playlists)
+			return null;
+		try {
+			return new ObjectMapper().readValue(playlists, new TypeReference<Set<Playlist>>(){});
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	@JsonIgnore
+	public Device setPlaylistSet(Set<Playlist> playlists) {
+		try {
+			this.playlists = new ObjectMapper().writeValueAsString(playlists);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
 		return this;
 	}
 	public void update(Model newInstance) {

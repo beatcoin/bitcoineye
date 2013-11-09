@@ -116,7 +116,7 @@ public class QueueResource {
 		    IndexSearcher isearcher = new IndexSearcher(ireader);
 		    Query query = null;
 		    QueryParser parser = new QueryParser(Version.LUCENE_45,"id", analyzer);
-			query = parser.parse(song.getId());
+			query = parser.parse("\""+song.getId()+"\"");
 		    Filter jakeFilter = new QueryWrapperFilter(new TermQuery(new Term("account", account.replace("-", "")))); 
 		    ScoreDoc[] hits = isearcher.search(query, jakeFilter, 1).scoreDocs;
 		    Document hitDoc = isearcher.doc(hits[0].doc);

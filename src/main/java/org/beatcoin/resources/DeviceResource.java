@@ -87,6 +87,7 @@ public class DeviceResource {
 		Device old = dao.queryEntity(q, Device.class);
 		e.setId(old.getId());
 		old.update(e);
+		old.setLastConnected(System.currentTimeMillis());
 	}
 
 	@GET
