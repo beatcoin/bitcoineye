@@ -11,6 +11,21 @@
 
 	<dependencies>
 		<dependency>
+			<artifactId>RestNucleusBoilerplate</artifactId>
+			<groupId>org.restnucleus</groupId>
+			<version>0.2.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.mail</groupId>
+					<artifactId>mail</artifactId>
+				</exclusion>
+				<exclusion>
+					<artifactId>guava</artifactId>
+					<groupId>com.google.guava</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
 			<groupId>org.sonatype.sisu</groupId>
 			<artifactId>sisu-guice</artifactId>
 			<version>3.1.7</version>
@@ -180,6 +195,23 @@
 					<source>1.7</source>
 					<target>1.7</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.datanucleus</groupId>
+				<artifactId>datanucleus-maven-plugin</artifactId>
+				<version>3.2.0-release</version>
+				<configuration>
+					<api>JDO</api>
+					<metadataIncludes>**/dao/*.class</metadataIncludes>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>enhance</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

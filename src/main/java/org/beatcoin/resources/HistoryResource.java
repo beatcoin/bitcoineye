@@ -31,7 +31,7 @@ public class HistoryResource {
 	
 	@SuppressWarnings("unchecked")
 	@GET
-	@Path("/{account}/songs")
+	@Path("/{account}")
 	public List<Song> getSongs(@PathParam("account") String account){
 		Element e = cache.get("history-"+account);
 		if (null!=e){

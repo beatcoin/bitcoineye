@@ -1,11 +1,16 @@
 package org.beatcoin.resources;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.inject.Inject;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -14,39 +19,48 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.beatcoin.BitcoinIServletConfig;
+import org.beatcoin.dao.Account;
 import org.beatcoin.pool.AddressPool;
 import org.beatcoin.pool.NotInitializedException;
-import org.beatcoin.pool.PoolInitializer;
-
-import com.google.inject.Injector;
+import org.restnucleus.dao.GenericRepository;
+import org.restnucleus.dao.RNQuery;
 
 @Path(WalletResource.PATH)
 @Produces(MediaType.APPLICATION_JSON)
 public class WalletResource {
 	public final static String PATH = "/accounts";
+	private final RNQuery query;
 	
+	private final GenericRepository dao;
+	
+	private final HttpServletRequest httpReq;
 	private final AddressPool addressPool;
-	private final Injector injector;
 	
 	@Inject
-	public WalletResource(AddressPool addressPool,
-			Injector injector){
+	public WalletResource(ServletRequest request,
+			AddressPool addressPool) {
+		this.httpReq = (HttpServletRequest)request;
+		this.query = (RNQuery)httpReq.getAttribute(RNQuery.QUERY_PARAM);
+		this.dao = (GenericRepository)httpReq.getAttribute("gr");
 		this.addressPool = addressPool;
-		this.injector = injector;
 	}
 	
 	@POST
-	public Map<String,String> create(){
-		String uuid = UUID.randomUUID().toString();
-		Map<String,String> rv = new HashMap<>();
-		rv.put("uuid", uuid);
-		PoolInitializer poolInitializer = injector.getInstance(PoolInitializer.class);
-		poolInitializer.setPool(addressPool);
-		poolInitializer.setAccount(uuid);
-		poolInitializer.start();
-		return rv;
+	public Response create(Account account){
+		dao.add(account);
+		try {
+			return Response.created(new URI(BitcoinIServletConfig.basePath+ PATH+"/"+account.getId())).build();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+		}		
 	}
 	
+	@GET
+	public List<Account> getEntity() {
+		return dao.queryList(query, Account.class);
+	}
 	
 	@POST
 	@Path("/{account}/reserveAddress")

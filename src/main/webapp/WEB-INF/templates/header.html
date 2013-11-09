@@ -20,3 +20,10 @@
 			basePath: <#if basePath??>'${basePath}'<#else>null</#if>
 	};
 </script>
+<style type="text/css">
+	#prevLink, #nextLink{
+	    background: transparent url(${resPath}/images/blank.gif) no-repeat; /* Trick IE into showing hover */
+	    }
+	#prevLink:hover, #prevLink:visited:hover { background: url(${resPath}/images/prev.gif) left 50% no-repeat; }
+	#nextLink:hover, #nextLink:visited:hover { background: url(${resPath}/images/next.gif) right 50% no-repeat; }
+</style>

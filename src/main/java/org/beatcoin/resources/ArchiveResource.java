@@ -53,7 +53,7 @@ import com.google.inject.Injector;
 @Path(ArchiveResource.PATH)
 @Produces(MediaType.APPLICATION_JSON)
 public class ArchiveResource {
-	public final static String PATH = "/archives";
+	public final static String PATH = "/songs";
 	
 	private final Directory directory;
 	private final Analyzer analyzer;
@@ -76,7 +76,7 @@ public class ArchiveResource {
 	}
 		
 	@POST
-	@Path("/{account}/songs")
+	@Path("/{account}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Map<String,String> addSongs(List<Song> songs,
 			@PathParam("account") String account){
@@ -119,7 +119,7 @@ public class ArchiveResource {
 	}
 	
 	@GET
-	@Path("/{account}/songs")
+	@Path("/{account}")
 	public List<Song> searchSongs(@QueryParam("query") String queryString,
 			@PathParam("account") String account){
 		if (null!=queryString && queryString.length()<2){
@@ -161,7 +161,7 @@ public class ArchiveResource {
 	}
 	
 	@DELETE
-	@Path("/{account}/songs")
+	@Path("/{account}")
 	public void remSongs(@PathParam("account") String account){
 		try{
 			IndexWriter iwriter = new IndexWriter(directory, new IndexWriterConfig(Version.LUCENE_45, analyzer));

@@ -60,7 +60,7 @@ public class QueueResource {
 	
 	@SuppressWarnings("unchecked")
 	@GET
-	@Path("/{account}/songs")
+	@Path("/{account}")
 	public Song[] getSongs(@PathParam("account") String account){
 		Element e = cache.get(account);
 		if (null!=e){
@@ -73,7 +73,7 @@ public class QueueResource {
 	
 	@SuppressWarnings("unchecked")
 	@POST
-	@Path("/{account}/songs")
+	@Path("/{account}")
 	public Song playSong(@PathParam("account") String account){
 		Element e = cache.get(account);
 		if (null!=e){
@@ -107,7 +107,7 @@ public class QueueResource {
 	
 	@SuppressWarnings("unchecked")
 	@PUT
-	@Path("/{account}/songs")
+	@Path("/{account}")
 	public Song pushSongToQueue(@PathParam("account") String account, Song song){
 		Song rv = null;
 		try{

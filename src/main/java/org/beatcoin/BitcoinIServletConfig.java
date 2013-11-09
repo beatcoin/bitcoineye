@@ -3,10 +3,15 @@ package org.beatcoin;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Enumeration;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.PriorityBlockingQueue;
 
+import javax.jdo.PersistenceManagerFactory;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
@@ -29,6 +34,10 @@ import org.beatcoin.pojo.Payment;
 import org.beatcoin.pojo.Song;
 import org.beatcoin.pool.AddressPool;
 import org.beatcoin.pool.PoolInitializer;
+import org.restnucleus.PersistenceConfiguration;
+import org.restnucleus.filter.PaginationFilter;
+import org.restnucleus.filter.PersistenceFilter;
+import org.restnucleus.filter.QueryFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +53,7 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
+import com.mysql.jdbc.AbandonedConnectionCleanupThread;
 
 public class BitcoinIServletConfig extends GuiceServletContextListener {
 	public static URL bcdUrl;
@@ -183,19 +193,53 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
         		  return testCache;
         	}
         	
+			@Provides @Singleton @SuppressWarnings("unused")
+			PersistenceManagerFactory providePersistence(){
+				PersistenceConfiguration pc = new PersistenceConfiguration();
+				pc.createEntityManagerFactory();
+				return pc.getPersistenceManagerFactory();
+			}
+        	
 			@Override
 			public void configureServlets() {
             	filter("/*").through(GuiceShiroFilter.class);
             	filter("/*").through(LoggingFilter.class);
             	filter("/*").through(CorsFilter.class);
+            	filter("/*").through(PersistenceFilter.class);
+            	filter("/*").through(QueryFilter.class);
+            	filter("/*").through(PaginationFilter.class);
 			}
 
 		},new BitcoinIShiroWebModule(this.servletContext));
 		return injector;
 	}
+	
+    public void deregisterJdbc(){
+        // This manually deregisters JDBC driver, which prevents Tomcat 7 from complaining about memory leaks wrto this class
+        Enumeration<Driver> drivers = DriverManager.getDrivers();
+        while (drivers.hasMoreElements()) {
+            Driver driver = drivers.nextElement();
+            try {
+                DriverManager.deregisterDriver(driver);
+                log.info(String.format("deregistering jdbc driver: %s", driver));
+            } catch (SQLException e) {
+            	log.info(String.format("Error deregistering driver %s", driver));
+                e.printStackTrace();
+            }
+        }
+        try {
+            AbandonedConnectionCleanupThread.shutdown();
+        } catch (InterruptedException e) {
+            log.warn("SEVERE problem cleaning up: " + e.getMessage());
+            e.printStackTrace();
+        }    	
+    }
 
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
+		Injector injector = (Injector) sce.getServletContext().getAttribute(Injector.class.getName());
+		injector.getInstance(PersistenceManagerFactory.class).close();
+		deregisterJdbc();
 		super.contextDestroyed(sce);
 		listener.stop();
 		log.info("ServletContextListener destroyed");
