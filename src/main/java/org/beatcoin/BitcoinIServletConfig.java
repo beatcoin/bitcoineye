@@ -196,7 +196,6 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 			@Provides @Singleton @SuppressWarnings("unused")
 			public SocketIOServer provideSocket(){
 			 	Configuration config = new Configuration();
-			    config.setHostname(basePath.split("://")[1].split(":")[0]);
 			    config.setPort(8081);
 			    SocketIOServer server = new SocketIOServer(config);
 			    return server;
