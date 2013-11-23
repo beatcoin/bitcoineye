@@ -32,6 +32,7 @@ import org.apache.shiro.guice.web.GuiceShiroFilter;
 import org.beatcoin.pojo.Notification;
 import org.beatcoin.pojo.Payment;
 import org.beatcoin.pojo.Song;
+import org.beatcoin.pojo.Subscribe;
 import org.beatcoin.pool.AddressPool;
 import org.beatcoin.pool.PoolInitializer;
 import org.restnucleus.PersistenceConfiguration;
@@ -46,8 +47,11 @@ import com._37coins.bcJsonRpc.BitcoindInterface;
 import com._37coins.bcJsonRpc.events.WalletListener;
 import com._37coins.bcJsonRpc.pojo.Transaction;
 import com._37coins.bcJsonRpc.pojo.Transaction.Category;
+import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.Configuration;
+import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
+import com.corundumstudio.socketio.listener.DataListener;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -149,6 +153,12 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 		}
 		i.getInstance(AddressPool.class);
 		server = i.getInstance(SocketIOServer.class);
+		server.addJsonObjectListener(Subscribe.class, new DataListener<Subscribe>() {
+	        @Override
+	        public void onData(SocketIOClient client, Subscribe data, AckRequest ackRequest) {
+	        	client.joinRoom(data.getRoom());
+	        }
+	    });
 		server.start();
 	}
 
@@ -186,7 +196,6 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 			@Provides @Singleton @SuppressWarnings("unused")
 			public SocketIOServer provideSocket(){
 			 	Configuration config = new Configuration();
-			 	System.out.println("basepath:" + basePath.split("://")[1].split(":")[0]);
 			    config.setHostname(basePath.split("://")[1].split(":")[0]);
 			    config.setPort(8081);
 			    SocketIOServer server = new SocketIOServer(config);

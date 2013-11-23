@@ -35,6 +35,7 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.Version;
+import org.beatcoin.BitcoinIServletConfig;
 import org.beatcoin.pojo.Song;
 import org.beatcoin.pool.AddressPool;
 import org.beatcoin.pool.NotInitializedException;
@@ -145,6 +146,8 @@ public class QueueResource {
 			PriorityBlockingQueue<Song> pq = (null!=e)?(PriorityBlockingQueue<Song>)e.getObjectValue():new PriorityBlockingQueue<Song>();
 			pq.add(rv);
 			cache.put(new Element(account,pq));
+			//notify via socket
+			BitcoinIServletConfig.server.getRoomOperations(account).sendMessage("hallo");
 		}catch (IOException|ParseException e){
 			e.printStackTrace();
 		}
