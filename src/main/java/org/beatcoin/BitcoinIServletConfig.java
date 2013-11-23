@@ -46,6 +46,8 @@ import com._37coins.bcJsonRpc.BitcoindInterface;
 import com._37coins.bcJsonRpc.events.WalletListener;
 import com._37coins.bcJsonRpc.pojo.Transaction;
 import com._37coins.bcJsonRpc.pojo.Transaction.Category;
+import com.corundumstudio.socketio.Configuration;
+import com.corundumstudio.socketio.SocketIOServer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -64,6 +66,7 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 	public static String resPath;
 	public static Logger log = LoggerFactory.getLogger(BitcoinIServletConfig.class);
 	public static Injector injector;
+	public static SocketIOServer server;
 	public static int poolSize;
 	static {
 		try {
@@ -145,6 +148,8 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 			e.printStackTrace();
 		}
 		i.getInstance(AddressPool.class);
+		server = i.getInstance(SocketIOServer.class);
+		server.start();
 	}
 
 	@Override
@@ -176,6 +181,16 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 			public Directory provideDirectory(){
 				Directory directory = new RAMDirectory();
 				return directory;
+			}
+			
+			@Provides @Singleton @SuppressWarnings("unused")
+			public SocketIOServer provideSocket(){
+			 	Configuration config = new Configuration();
+			 	System.out.println("basepath:" + basePath.split("://")[1].split(":")[0]);
+			    config.setHostname(basePath.split("://")[1].split(":")[0]);
+			    config.setPort(8081);
+			    SocketIOServer server = new SocketIOServer(config);
+			    return server;
 			}
 
         	@Provides @Singleton @SuppressWarnings("unused")
@@ -241,6 +256,7 @@ public class BitcoinIServletConfig extends GuiceServletContextListener {
 		injector.getInstance(PersistenceManagerFactory.class).close();
 		deregisterJdbc();
 		super.contextDestroyed(sce);
+		server.stop();
 		listener.stop();
 		log.info("ServletContextListener destroyed");
 	}

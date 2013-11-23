@@ -86,8 +86,8 @@ public class DeviceResource {
 		RNQuery q = new RNQuery().addFilter("uuid", uuid);
 		Device old = dao.queryEntity(q, Device.class);
 		e.setId(old.getId());
+		e.setLastConnected(System.currentTimeMillis());
 		old.update(e);
-		old.setLastConnected(System.currentTimeMillis());
 	}
 
 	@GET
